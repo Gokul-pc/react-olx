@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import './App.css';
 import Signup from './Pages/Signup';
@@ -8,6 +8,7 @@ import Login from './Pages/Login';
  */
 import Home from './Pages/Home';
 import Loader from './Components/loader/Loader';
+import { AuthContext, FirebaseContext } from './store/Context';
 
 
 
@@ -18,9 +19,18 @@ function App() {
       setLoad(false)
     }, 1500)
   })
+
+  const { setUser } = useContext(AuthContext)
+  const { firebase } = useContext(FirebaseContext)
+
+  useEffect(() => {
+    firebase.auth().onAuthStateChanged((user) => {
+      setUser(user)
+    })
+  })
   return (
     <div>
-      <Router> 
+      <Router>
         <Route exact path="/">
           <Home />
         </Route>
@@ -34,7 +44,7 @@ function App() {
             load == true ? <Loader /> : <Login />
           }
         </Route>
-     </Router>
+      </Router>
     </div>
   );
 }

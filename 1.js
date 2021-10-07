@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useHistory } from 'react-router';
 import Logo from '../../olx-logo.png';
-import { FirebaseContext } from '../../store/Context';
+import { FirebaseContext } from '../../store/FirebaseContext';
 import './Signup.css';
 
 export default function Signup() {
@@ -10,6 +10,10 @@ export default function Signup() {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
+  const [emailError, setEmailError] = useState("")
+  const [passwordError, setPasswordError] = useState("")
+  const [user, setUser] = useState('')
+  const [hasAccount, setHasAccount] = useState(false)
   const { firebase } = useContext(FirebaseContext)
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -23,14 +27,36 @@ export default function Signup() {
           history.push('/login')
         })
       })
-    }).catch((error) => {
-      alert(error.message)
+    }).catch((err) => {
+      switch (err.code) {
+        case 'auth/invalid-email':
+        case "auth/user-disabled":
+        case "auth/user-not-found":
+          setEmailError(err.message)
+          break;
+        case "auth/wrong-password":
+          setPasswordError(err.message)
+          break;
+      }
     })
   }
   const loginClick = () => {
     history.push('/login')
   }
 
+  const authListner=()=>{
+    firebase.auth().onAuthStateChanged((user)=>{
+      if(user){
+        setUser(user)
+      }else{
+        setUser("")
+      }
+    })
+  }
+
+  useEffect(() => {
+    authListner()
+  }, [])
   return (
     <div>
       <div className="signupParentDiv">
